@@ -1,0 +1,40 @@
+﻿def drop_table_string(database,tablename):
+    if (database.strip() == "") or (tablename.strip() == ""):
+        print("Wrong parameters")
+        return ""
+    else:
+        return "DROP TABLE " + database + "." + tablename
+        
+def create_table_string(columns, database, tablename, delimiter=";", stored_as="TEXTFILE",line_end=r"\n"):
+    columns = " string,\n    ".join(columns) + " string"
+    option_rows = "LINES TERMINATED BY \"" + line_end + "\""
+    option_fields = "FIELDS TERMINATED BY \"" + delimiter + "\""   
+    query = "CREATE TABLE " + database + "." + tablename + " (\n    " + columns + "\n)\n" + "ROW FORMAT DELIMITED\n" + option_fields + "\n" + option_rows + "\n" + "STORED AS " + stored_as + "\ntblproperties('serialization.null.format'='')"
+    return query
+    
+query_drop = drop_table_string(database="mes", tablename="json_mal_cheia_teste")
+query_create = create_table_string(df.columns
+    ,database="mes"
+    ,tablename="json_mal_cheia_teste"
+    ,delimiter="|"
+    ,line_end=r"\n"
+    ,stored_as="TEXTFILE"
+)
+
+hc.sql(query_drop)
+hc.sql(query_create)
+df.write.insertInto("mes.json_mal_cheia_teste")
+
+
+def save_in_hive(df,database,tablename,delimiter="|",line_end=r"\n",stored_as="TEXTFILE"):
+    query_drop = drop_table_string(database=database, tablename=tablename)
+    query_create = create_table_string(df.columns
+        ,database=database
+        ,tablename=tablename
+        ,delimiter=delimiter
+        ,line_end=line_end
+        ,stored_as=stored_as
+    )
+    hc.sql(query_drop)
+    hc.sql(query_create)
+    df.write.insertInto(database+"."+tablename)
