@@ -18,39 +18,39 @@ def hdfs_listdir(blob_path):
 def get_file(remotefilepath, localpath):
     command = " ".join(['hdfs', 'dfs', '-get', "\"{0}\"".format(remotefilepath), "\"{0}\"".format(localpath)])
     print("Downloading file: " + remotefilepath + " ...")
-    p = subprocess.call(command,shell=True)
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
-    print("File downloaded!") if p == 0 else print("Fail to download file: " + remotefilepath)
+    #print("File downloaded!") if p == 0 else print("Fail to download file: " + remotefilepath)
     return p
 
 
 def put_file(localfilepath, remotefilepath):
     command = " ".join(['hdfs', 'dfs', '-put',  "\"{0}\"".format(localfilepath), "\"{0}\"".format(remotefilepath)])
-    print(command)
+    #print(command)
     print("Sending file " + localfilepath + " ...")
-    p = subprocess.call(command,shell=True)
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
-    print("File sent!") if p == 0 else print("Fail to send file from: " + localfilepath + " to " + remotefilepath)
+    #print("File sent!") if p == 0 else print("Fail to send file from: " + localfilepath + " to " + remotefilepath)
     return p
 
 
 def remove_file(remotefilepath):
     command = " ".join(['hdfs', 'dfs', '-rm',  "\"{0}\"".format(remotefilepath)])
-    print(command)
+    #print(command)
     print("Removing previous file " + remotefilepath + " ...")
-    p = subprocess.call(command,shell=True)
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
-    print("File removed!") if p == 0 else print("Fail to remove file from: " + remotefilepath)
+    #print("File removed!") if p == 0 else print("Fail to remove file from: " + remotefilepath)
     return p
 
 
 def move_file(_from_,_to_):
     command = " ".join(['hdfs', 'dfs', '-mv',  "\"{0}\"".format(_from_),  "\"{0}\"".format(_to_)])
-    print(command)
+    #print(command)
     print("Moving previous file from " + _from_ + " to: " + _to_ + " ...")
-    p = subprocess.call(command,shell=True)
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
-    print("File moved!") if p == 0 else print("Fail to move file from: " + _from_ + " to: " + _to_ + " ...")
+    #print("File moved!") if p == 0 else print("Fail to move file from: " + _from_ + " to: " + _to_ + " ...")
     return p
 
 

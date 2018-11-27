@@ -1,0 +1,33 @@
+#PRINCIPAL
+
+QTD_ARQUIVOS=$(ls ${HOME_BID_LANDZONE_FILES}/*${FILENAME}*[Xx][Ll][Ss][Bb]*  2>/dev/null | grep bid | wc -l)
+if [ $QTD_ARQUIVOS -ne 0 ]; then
+    for ARQUIVO in $(ls ${HOME_BID_LANDZONE_FILES}/*${FILENAME}*[Xx][Ll][Ss][Bb]*); do
+        libreoffice \
+            --headless \
+            --convert-to "csv:Text - txt - csv (StarCalc):59,,76,1" ${ARQUIVO} \
+            --outdir ${HOME_BID_LANDZONE_FILES}
+        rm ${ARQUIVO}
+    done
+fi
+
+
+
+QTD_ARQUIVOS=$(ls ${HOME_BID_LANDZONE_FILES}/*${FILENAME}*[Xx][Ll][Ss][Bb]*  2>/dev/null | grep bid | wc -l)
+if [ $QTD_ARQUIVOS -ne 0 ]; then
+    echoLog ""
+    echoLog "------------------------------------------------------------------------------------------------------------------"
+    echoLog " Convertendo arquivos XLSB."
+    echoLog "------------------------------------------------------------------------------------------------------------------"
+    for ARQUIVO in $(ls ${HOME_BID_LANDZONE_FILES}/*${FILENAME}*[Xx][Ll][Ss][Bb]*); do
+        echoLog ""
+        echoLog "------------------------------------------------------------------------------------------------------------------"
+        echoLog " Convertendo arquivo XLSB: ${ARQUIVO}."
+        echoLog "------------------------------------------------------------------------------------------------------------------"
+        libreoffice \
+            --headless \
+            --convert-to "csv:Text - txt - csv (StarCalc):59,,76,1" ${ARQUIVO} \
+            --outdir ${HOME_BID_LANDZONE_FILES}
+        rm ${ARQUIVO}
+    done
+fi

@@ -1,0 +1,10 @@
+set yy=%date:~6,4%
+set MM=%date:~3,2%
+set dd=%date:~0,2%
+set hh=%time:~0,2%
+set mm=%time:~3,2%
+set ss=%time:~6,2%
+set timestamp=%yy%%MM%%dd%%hh%%mm%%ss%
+MES_STATUS_EXECUÇÃO_%timestamp%.txt
+
+STATUS_EXECUÇÃO_MES_%date:~6,4%%date:~3,2%%date:~0,2%%time:~0,2%%time:~3,2%%time:~6,2%.txt
