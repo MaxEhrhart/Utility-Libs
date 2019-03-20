@@ -1,0 +1,96 @@
+-------------------------------
+Questões teoricas / descritivas
+-------------------------------
+Qual o objetivo do comando cache em Spark? 
+R: Permite adicionar na memoria cache de todos os nós do cluster um dataset que possivelmente será acessado muitas vezes, ajudando a ganhar tempo e desempenho sem precisar executar diversas vezes o mesmo dataset.
+
+O mesmo código implementado em Spark é normalmente mais rápido que a implementação equivalente em MapReduce. Por quê? 
+R: Porque o spark procura sempre processar seus dados em memória e processar de forma otimizada, enquanto em muitas etapas do map reduce, há diversas escritas em disco e nessa fase de escrita há um tempo enorme perdido.
+
+Qual é a função do SparkContext? 
+R: Conecta o programa desenvolvido, código ou aplicação ao cluster spark para assim  realizar seus comandos, tarefas, etc.
+
+Explique com suas palavras o que é Resilient Distributed Datasets (RDD).
+R: É uma estrutura de dados imutável do spark que permite a execução paralela de tratamentos dos dados em diversos nós em memoria. Existem alternativas muito melhores a isso nas versões atuais  (datasets e spark query) porque o spark mais atual já otimiza internamente os rdds dos datasets, Os rdds estão em desuso também pois sua desvantagem são códigos complexos e que levam muito mais tempo para serem desenvolvidos.
+
+GroupByKey é menos eficiente que reduceByKey em grandes dataset. Por quê? 
+R:  O reduceByKey realiza um agrupamento interno dos dados em cada nó e depois envia para os próximos nós continuarem a operação., o Groupbykey é mais devagar para largos datasets porque  ele distribui os dados na rede antes de realizar uma operação semelhante.
+
+Explique o que o código Scala abaixo faz. 
+"""
+	val textFile = sc.textFile("hdfs://...") 
+	val counts = textFile.flatMap(line => line.split(" ")) 
+	.map(word => (word, 1)) 
+	.reduceByKey(_ + _) 
+	counts.saveAsTextFile("hdfs://...") 
+"""
+R: Realiza a contagem  da quantidade de Palavras de um arquivo no hdfs e salva o resultado em um arquivo no hdfs.
+
+--------------------------------
+QUESTÕES SOBRE O DATASET DA NASA [Em desenvolvimento]
+--------------------------------
+Responda as seguintes questões devem ser desenvolvidas em Spark utilizando a sua linguagem de preferência. 
+# Lembrando que nao consigo testar para saber, vou colocar o codigo que possivelmente retorna esse resultado.
+1.	Número de hosts únicos. 
+	requestsNASA.select('host').distinct().count().show()
+	
+2. O total de erros 404. 
+	requestsNASA.filter("retorno_http" == '404').count().show()
+	
+3. Os 5 URLs que mais causaram erro 404. 
+	requestsNASA.filter("retorno_http" == '404')["host"].groupBy("host").count().orderBy($"host".desc).show(5)
+	
+4. Quantidade de erros 404 por dia. 
+	requestsNASA.filter("retorno_http" == '404')["timestamp"].groupBy("timestamp").count().show()
+	
+5. O total de bytes retornados. 
+	requestsNASA.agg(sum("bytes")).show()
+
+
+------------------------
+CODIGO SPARK COMEÇA AQUI
+------------------------
+# Imports
+from pyspark import SparkContext
+from pyspark.sql import SQLContext
+from pyspark.sql.types import StructType, StructField, DoubleType, IntegerType, StringType
+import pyspark.sql.functions as F
+from pyspark.sql.functions import *
+
+# Cria context
+sc = SparkContext("local", "Teste")
+sql_context = SQLContext(sc)
+
+
+def separa_cols(x = """199.72.81.55 - - [01/Jul/1995:00:00:01 -0400] "GET /history/apollo/ HTTP/1.0" 200 6245"""):
+	z = x.split()
+
+	host = z[0]
+	timestamp = " ".join(z[3:5])
+	request = " ".join(z[5:8]).strip("]").strip("[")
+	retorno_http = z[8]
+	bytes = z[9]	
+	return host, timestamp, request, retorno_http, bytes
+
+# Não consigo testar para saber se funcionaria.
+requestsNASA = sc.textFile("file://pasta_arquivos_txtAgosto_e_julho/*").map(lambda x:
+separa_cols(x)).toDf(["host", "timestamp", "request", "retorno_http", "bytes"])
+
+requestsNASA = requestsNASA.withColumn("retorno_http", log_df["field1"].cast(IntegerType()))
+requestsNASA = requestsNASA.withColumn("retorno_http", log_df["field1"].cast(IntegerType()))
+requestsNASA = requestsNASA.withColumn("timestamp", to_timestamp("dt", "yyyy/MMM/dd:hh:mm:ss TZD"))
+
+# RESPOSTA 1: 
+requestsNASA.select('host').distinct().count().show()
+
+# RESPOSTA 2:
+requestsNASA.filter("retorno_http" == '404').count()
+
+# RESPOSTA 3:
+requestsNASA.filter("retorno_http" == '404').groupBy("retorno_http").count().orderBy($"retorno_http".desc).show(5)
+
+# RESPOSTA 4:
+requestsNASA.filter("retorno_http" == '404')["timestamp"].groupBy("timestamp").count().show()
+
+# RESPOSTA 5:
+requestsNASA.agg(sum("bytes")).show()
