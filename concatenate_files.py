@@ -1,18 +1,18 @@
 # -*- encoding: utf-8 -*-
-from itertools import islice
 from os import listdir
-from os.path import basename, abspath
-from glob import glob
+from os.path import basename
+from itertools import islice
 
 #PEGAR AGOSTO DE 2014 ARQUIVO 03 08 2014
-PARTICAO = 150000  # qtd de linhas a serem alteradas de cada vez
+LINHAS = 1000  # qtd de linhas a serem alteradas de cada vez
+DELIMITER_IN = "\t"
+DELIMITER_OUT = ";"
 
-
-def read_in_chunks(file_object, chunk_size=PARTICAO):
+def read_in_chunks(file_object, chunk_size=1024):
     """Lazy function (generator) to read a file piece by piece.
     Default chunk size: 1k."""
     while True:
-        data = file_object.read(chunk_size)
+        data = file_object.readlines(chunk_size)
         if not data:
             break
         yield data
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     for diretorio_ano in raiz:
         ano = basename(diretorio_ano)[0:4]
-        diretorio_mes = [diretorio_ano + "\\" + diretorio for diretorio in listdir(diretorio_ano)]
+        diretorio_mes = [diretorio_ano + "\\" + diretorio for diretorio in listdir(diretorio_ano)][::-1]
         """
             01_JAN
             02_FEV
@@ -52,11 +52,10 @@ if __name__ == "__main__":
             mes = basename(diretorio_arquivos).replace("_"," ")
             arquivo_destino = "{}\{} - {}.csv".format(diretorio_arquivos, ano, mes)
             print("Escrevendo arquivo: {}".format(arquivo_destino))
-            
+
             f_out = open(arquivo_destino, "a+", encoding="utf-8")
 
             for arquivo in caminho_arquivos:
-
                 """
                     01_JAN, MERCEARIA_CONS (2).txt
                     01_JAN, MERCEARIA_CONS (3).txt
@@ -64,13 +63,24 @@ if __name__ == "__main__":
                     01_JAN, MERCEARIA_CONS.txt
                     ...
                 """
+                print("    Lendo arquivo: {}".format(arquivo))
+                with open(arquivo,"r",encoding="utf-8") as f_in:
+                    next(f_in)  # pula header
 
-                f_in = open(arquivo,"r",encoding="utf-8")
-                next(f_in)  # pula header
+                    while True:
+                        treated_lines = []
+                        raw_lines = list(islice(f_in, LINHAS))
 
-                for lines in read_in_chunks(f_in):
-                    f_out.writelines([line.replace("\t",";") for line in lines])
-                    f_out.flush()
+                        if not raw_lines:
+                            break
+
+                        for line in raw_lines:
+                            line = line.split(DELIMITER_IN)
+                            line = DELIMITER_OUT.join(line[:7] + [col.replace(",",".").strip() for col in line[7:]])
+                            treated_lines.append(line)
+
+                        f_out.writelines(treated_lines)
+                        f_out.flush()
 
                 f_in.close()
             f_out.close()
