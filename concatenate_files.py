@@ -47,11 +47,16 @@ if __name__ == "__main__":
             12_DEZ
         """
 
-        for diretorio_arquivos in diretorio_mes:            
+        for diretorio_arquivos in diretorio_mes:
             caminho_arquivos = [diretorio_arquivos + "\\" + nome_arquivo for nome_arquivo in listdir(diretorio_arquivos)]
+            mes = basename(diretorio_arquivos).replace("_"," ")
+            arquivo_destino = "{}\{} - {}.csv".format(diretorio_arquivos, ano, mes)
+            print("Escrevendo arquivo: {}".format(arquivo_destino))
             
-            for mes, arquivo in zip(diretorio_mes, caminho_arquivos):
-                
+            f_out = open(arquivo_destino, "a+", encoding="utf-8")
+
+            for arquivo in caminho_arquivos:
+
                 """
                     01_JAN, MERCEARIA_CONS (2).txt
                     01_JAN, MERCEARIA_CONS (3).txt
@@ -59,8 +64,7 @@ if __name__ == "__main__":
                     01_JAN, MERCEARIA_CONS.txt
                     ...
                 """
-                arquivo_destino = diretorio_arquivos + "\\" + ano + " - " + basename(mes).replace("_"," ") + ".csv"
-                f_out = open(arquivo_destino, "a+", encoding="utf-8")
+
                 f_in = open(arquivo,"r",encoding="utf-8")
                 next(f_in)  # pula header
 
