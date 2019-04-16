@@ -4,7 +4,7 @@ from os.path import basename
 from itertools import islice
 
 #PEGAR AGOSTO DE 2014 ARQUIVO 03 08 2014
-LINHAS = 1000  # qtd de linhas a serem alteradas de cada vez
+LINHAS = 10000  # qtd de linhas a serem alteradas de cada vez
 DELIMITER_IN = "\t"
 DELIMITER_OUT = ";"
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
                         for line in raw_lines:
                             line = line.split(DELIMITER_IN)
                             line = DELIMITER_OUT.join(line[:7] + [col.replace(",",".").strip() for col in line[7:]])
-                            treated_lines.append(line)
+                            treated_lines.append(line + "\n")
 
                         f_out.writelines(treated_lines)
                         f_out.flush()
