@@ -1,2 +1,3 @@
-def class MultiThread:
-    __init__:
+class MultiThread:
+    def __init__(self):
+        pass

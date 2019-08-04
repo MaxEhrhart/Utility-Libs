@@ -13,10 +13,10 @@ DELIMITER_IN = "\t"
 LINHAS = 10000  # qtd de linhas a serem alteradas de cada vez
 DELIMITER_OUT = ";"
 
-
 if __name__ == "__main__":
     caminho_raiz = r"C:\Users\tc015789\Downloads\BACKUPS - BANCO DE LOJAS"
-    raiz = [caminho_raiz + "\\" + diretorio for diretorio in listdir(caminho_raiz)][::-1]  # remover o [:3] apos processamento
+    raiz = [caminho_raiz + "\\" + diretorio for diretorio in listdir(caminho_raiz)][
+           ::-1]  # remover o [:3] apos processamento
     """
         2014 - MERCEARIA
         2015 - MERCEARIA
@@ -43,8 +43,9 @@ if __name__ == "__main__":
             12_DEZ 1
         """
         for diretorio_arquivos in diretorio_mes:
-            caminho_arquivos = [diretorio_arquivos + "\\" + nome_arquivo for nome_arquivo in listdir(diretorio_arquivos)]
-            mes = basename(diretorio_arquivos).replace("_"," ")
+            caminho_arquivos = [diretorio_arquivos + "\\" + nome_arquivo for nome_arquivo in
+                                listdir(diretorio_arquivos)]
+            mes = basename(diretorio_arquivos).replace("_", " ")
             arquivo_destino = "{}\{} - {}.csv".format(diretorio_arquivos, ano, mes)
             print("Escrevendo arquivo: {}".format(arquivo_destino))
 
@@ -59,7 +60,7 @@ if __name__ == "__main__":
                     """
                     print("    Lendo arquivo: {}".format(arquivo))
 
-                    with open(arquivo,"r",encoding="utf-8") as f_in:
+                    with open(arquivo, "r", encoding="utf-8") as f_in:
                         next(f_in)  # pula header
 
                         while True:
@@ -71,7 +72,8 @@ if __name__ == "__main__":
 
                             for line in raw_lines:
                                 line = line.split(DELIMITER_IN)
-                                line = DELIMITER_OUT.join(line[:7] + [col.replace(",",".").strip() for col in line[7:]])
+                                line = DELIMITER_OUT.join(
+                                    line[:7] + [col.replace(",", ".").strip() for col in line[7:]])
                                 treated_lines.append(line + "\n")
 
                             f_out.writelines(treated_lines)

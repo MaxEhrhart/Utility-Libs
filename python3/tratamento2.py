@@ -8,10 +8,10 @@ def recebe_argumentos():
     parser = argparse.ArgumentParser(description="MULTIPLICITY TEST.")
     parser.add_argument("-file", "-f", help="Full csv file path.", required=True)
     parser.add_argument("-delimiter", "-d", help="Csv file delimiter.", required=False, const=",")
-    
+
     args = parser.parse_args()
     return args.file, args.delimiter
-            
+
 
 def multiplicity_test():
     """
@@ -39,6 +39,6 @@ def multiplicity_test():
 
 
 file, delimiter = recebe_argumentos()
-print(file,delimiter)
+print(file, delimiter)
 
-#df = pd.read_csv(file, encoding="utf8")
+# df = pd.read_csv(file, encoding="utf8")

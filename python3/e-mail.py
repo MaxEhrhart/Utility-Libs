@@ -13,39 +13,46 @@ from os.path import abspath, dirname, basename, exists, isdir
 from zipfile import ZipFile, ZIP_DEFLATED
 from six import PY2, PY3
 
+
 def recebe_argumentos():
     """ Recebe argumentos como parametro para execução. """
     parser = argparse.ArgumentParser(description='Envio de extratos.')
-    parser.add_argument("--recente", "--r", help="Seleciona a execução mais recente automaticamente.", required=False,action="store_true")
+    parser.add_argument("--recente", "--r", help="Seleciona a execução mais recente automaticamente.", required=False,
+                        action="store_true")
     pasta = parser.add_mutually_exclusive_group(required=False)
-    pasta.add_argument("--pasta_base", "--pb", help="Se esse parametro for passado, muda o local padrão onde são buscados os anexos para essa execução. Passar caminho todo, ex.: c:/.../...", required=False,type=str)
-    pasta.add_argument("--pasta_execucao", "--pe", help="Se esse parametro for passado, recebe como parametro diretamente a pasta \"AAAAMM_T_000\" e envia os extratos para os gestores nela contidos.", required=False,type=str)
+    pasta.add_argument("--pasta_base", "--pb",
+                       help="Se esse parametro for passado, muda o local padrão onde são buscados os anexos para essa execução. Passar caminho todo, ex.: c:/.../...",
+                       required=False, type=str)
+    pasta.add_argument("--pasta_execucao", "--pe",
+                       help="Se esse parametro for passado, recebe como parametro diretamente a pasta \"AAAAMM_T_000\" e envia os extratos para os gestores nela contidos.",
+                       required=False, type=str)
     args = parser.parse_args()
     return args.recente, args.pasta_base, args.pasta_execucao
 
 
 def mes_do_ano(ano_mes):
-    meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
-    return meses[int(ano_mes[4:])-1]
+    meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro",
+             "Novembro", "Dezembro"]
+    return meses[int(ano_mes[4:]) - 1]
 
 
-def cria_zip(lista_arquivos,diretorio_zip):
+def cria_zip(lista_arquivos, diretorio_zip):
     """ Cria arquivo zip na pasta especificada. """
     # Cria ZIP para anexar
-    #nome_zip = u"[{}-{}-{}] - Extratos de comissão de ".format(ano_mes, tipo_execucao.upper(),codigo_execucao)
-    #anexo = cria_zip(arquivos)
-    with ZipFile(diretorio_zip+"/"+nome_zip, 'w', ZIP_DEFLATED) as zip:
+    # nome_zip = u"[{}-{}-{}] - Extratos de comissão de ".format(ano_mes, tipo_execucao.upper(),codigo_execucao)
+    # anexo = cria_zip(arquivos)
+    with ZipFile(diretorio_zip + "/" + nome_zip, 'w', ZIP_DEFLATED) as zip:
         for arquivo in lista_arquivos:
             zip.write(basename(arquivo))
         zip.close()
     return diretorio_zip + "/" + nome_zip
-    
+
 
 if __name__ == "__main__":
 
     # Recebe Parâmetros
     p_recente, p_pasta_base, p_pasta_execucao = recebe_argumentos()
-    
+
     # Verifica se parametro pasta_execucao foi passado e se é valido, se sim, pula para envio de email
     if p_pasta_execucao != None:
         if isdir(p_pasta_execucao):
@@ -63,9 +70,10 @@ if __name__ == "__main__":
                 exit()
         else:
             pasta_base = abspath(dirname(__file__)).replace("\\", "/")
-            
+
         pasta_execucoes = sorted(walk(pasta_base).next()[1]) if PY2 else sorted(walk(pasta_base).__next__()[1])
-        pasta_execucoes = [(int(pasta_execucao.split("_")[2]),pasta_execucao) for pasta_execucao in pasta_execucoes if len(pasta_execucao) == 12]
+        pasta_execucoes = [(int(pasta_execucao.split("_")[2]), pasta_execucao) for pasta_execucao in pasta_execucoes if
+                           len(pasta_execucao) == 12]
 
         # Verifica se tem execucoes para enviar
         if len(pasta_execucoes) == 0:
@@ -77,11 +85,12 @@ if __name__ == "__main__":
         print(selecao)
         # Seleção de execuções
         if not p_recente:
-        
-            opcoes = ["{:03d} - {}\n".format(pasta_execucao[0],pasta_execucao[1]) for pasta_execucao in pasta_execucoes]
-            codigos_exec = list(map(str,selecao))
+
+            opcoes = ["{:03d} - {}\n".format(pasta_execucao[0], pasta_execucao[1]) for pasta_execucao in
+                      pasta_execucoes]
+            codigos_exec = list(map(str, selecao))
             sel_exec = ""
-            
+
             while (sel_exec not in codigos_exec) or (len(sel_exec) < 1):
                 print(u"Selecione uma pasta entre os seguintes códigos de execução:\n")
                 print(u"".join(opcoes))
@@ -92,17 +101,17 @@ if __name__ == "__main__":
 
         # Pasta execução com os emails dos gestores no nome
         pasta_execucao = pasta_base + "/" + list(filter(lambda t: t[0] == int(sel_exec), pasta_execucoes))[0][1]
-    
-    ano_mes, tipo_execucao, codigo_execucao = pasta_execucao.rsplit("/",1)[-1].split("_")
+
+    ano_mes, tipo_execucao, codigo_execucao = pasta_execucao.rsplit("/", 1)[-1].split("_")
     tipo_execucao = "Prévia" if tipo_execucao.upper() == "P" else "Oficial" if tipo_execucao.upper() == "O" else "Ajuste"
 
     # Verifica se existem pasta com @ no nome
     pastas_gestores = [x for x in listdir(pasta_execucao) if x.find("@") != -1]
-    
+
     if len(pastas_gestores) == 0:
         print(u"Nenhuma pasta contendo email do gestor foi encontrada")
         exit()
-    
+
     # Abre Outlook para envios
     outlook = win32.Dispatch('outlook.application')
 
@@ -113,17 +122,17 @@ if __name__ == "__main__":
         endereco_email = pasta_gestor.strip()
 
         # Adiciona Caminho da pasta à pasta gestor
-        pasta_gestor = pasta_execucao+"/"+pasta_gestor
+        pasta_gestor = pasta_execucao + "/" + pasta_gestor
 
         # Lista de PDFs na pasta
         arquivos = [pasta_gestor + "/" + s for s in listdir(pasta_gestor)]
-        
+
         # Se a pasta possui arquivos para anexar, envia, senao, pula para o proximo
         if len(arquivos) > 0:
-            
+
             # EMAIL
             email = outlook.CreateItem(0)
-            email.To = 'gabriel.roque@sodexo.com'#endereco_email
+            email.To = 'gabriel.roque@sodexo.com'  # endereco_email
             email.Subject = "[{0}_{1}] Comissão de Vendas".format(ano_mes, tipo_execucao.upper())
             email.HTMLBody = 'Prezado(a),'
             email.HTMLBody += '<br>'
@@ -161,7 +170,7 @@ if __name__ == "__main__":
             try:
                 print(u"Enviando extratos para: " + endereco_email)
                 email.Send()
-                #email.Display()
+                # email.Display()
                 print(u"Email enviado!")
             except Exception as ex:
                 print(u"Falha ao enviar extratos para: " + endereco_email + "\n{}\n\n".format(str(ex)))
@@ -170,4 +179,4 @@ if __name__ == "__main__":
             print(u"Nenhum anexo encontrado para o seguinte gestor: {}".format(endereco_email))
 
     # Fecha Outlook após envio
-    #outlook.Quit()
+    # outlook.Quit()

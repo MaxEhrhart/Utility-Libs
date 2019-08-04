@@ -5,6 +5,7 @@ from os.path import basename, splitext
 
 def hdfs_get_filelist(blob_path, delimiter="_"):
     """ Lists hdfs dir and returns named tuples with information of file based on its filename. """
+
     def hdfs_listdir(blob_path):
         command = 'hdfs dfs -ls ' + blob_path
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -14,11 +15,12 @@ def hdfs_get_filelist(blob_path, delimiter="_"):
             files.pop(0)  # remove summary from ls: "found n items".
         qty_files = len(files)
         return files, qty_files
+
     files, qty_files = hdfs_listdir(blob_path)
     kpis = []
     # If there are items in dir.
     if qty_files > 0:
-        KPI = namedtuple('KPI', ["filepath", "filename", "kpi_name", "initial_date", "final_date", "key","extension"])
+        KPI = namedtuple('KPI', ["filepath", "filename", "kpi_name", "initial_date", "final_date", "key", "extension"])
         for file in files:
             filename, ext = basename(file), splitext(basename(file))[1]
             if ext == ".json":
@@ -45,5 +47,6 @@ def hdfs_get_filelist(blob_path, delimiter="_"):
                 )
             kpis.append(kpi)
     return kpis, len(kpis)
+
 
 kpis, files = hdfs_get_filelist("wasbs://hdiprojsupplydatalake-2018-07-12t15-58-09-078z@hdiprojsupplydatalake.blob.core.windows.net/estrutura_final/")

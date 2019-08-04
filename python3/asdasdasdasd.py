@@ -14,7 +14,9 @@ import subprocess
 def parameters():
     """ receive parameters. """
     parser = argparse.ArgumentParser(description="DATA QUALITY.")
-    parser.add_argument("-mode", "-m", help="Type of dataquality test, Datatype, Multiplicity or Statistic ( D, M or S).", required=False)
+    parser.add_argument("-mode", "-m",
+                        help="Type of dataquality test, Datatype, Multiplicity or Statistic ( D, M or S).",
+                        required=False)
     parser.add_argument("-input", "-i", help="Blob input file_path.", required=False)
     parser.add_argument("-output", "-o", help="Blob output file_path.", required=False)
     parser.add_argument("-faillines", "-fl", help="Blob fail lines file_path.", required=False)
@@ -29,19 +31,19 @@ def parameters():
 
 def write_status_file(status_dict: dict, donefile: str):
     status_line = ";".join([
-          status_dict['execution_status']
+        status_dict['execution_status']
         , status_dict['initial_lines']
         , status_dict['exit_lines']
         , status_dict['start_date']
         , status_dict['end_date']
     ])
-    with open(donefile,"w+",encoding="utf-8") as f:
+    with open(donefile, "w+", encoding="utf-8") as f:
         f.write(status_line + "\n")
         f.close()
 
 
-def remove_temp_files(local_file="", qafaillines="",qafaillineslog="",hive_file="",done_file=""):
-    temp_files = sorted(list(filter(None,set([local_file, qafaillines, qafaillineslog, hive_file, done_file]))))
+def remove_temp_files(local_file="", qafaillines="", qafaillineslog="", hive_file="", done_file=""):
+    temp_files = sorted(list(filter(None, set([local_file, qafaillines, qafaillineslog, hive_file, done_file]))))
     print("Removing temporary files ...")
     for temp_file in temp_files:
         print("Removing: " + temp_file + " ...")
@@ -52,34 +54,34 @@ def remove_temp_files(local_file="", qafaillines="",qafaillineslog="",hive_file=
 def get_file(remotefilepath, localpath):
     command = " ".join(['hdfs', 'dfs', '-get', "\"{0}\"".format(remotefilepath), "\"{0}\"".format(localpath)])
     print("Downloading file: " + remotefilepath + " ...")
-    p = subprocess.call(command,shell=True)
+    p = subprocess.call(command, shell=True)
     print("File downloaded!") if p == 0 else print("Fail to download file: " + remotefilepath)
     return p
 
 
 def put_file(localfilepath, remotefilepath):
-    command = " ".join(['hdfs', 'dfs', '-put',  "\"{0}\"".format(localfilepath), "\"{0}\"".format(remotefilepath)])
+    command = " ".join(['hdfs', 'dfs', '-put', "\"{0}\"".format(localfilepath), "\"{0}\"".format(remotefilepath)])
     print(command)
     print("Sending file " + localfilepath + " ...")
-    p = subprocess.call(command,shell=True)
+    p = subprocess.call(command, shell=True)
     print("File sent!") if p == 0 else print("Fail to send file from: " + localfilepath + " to " + remotefilepath)
     return p
 
 
 def remove_file(remotefilepath):
-    command = " ".join(['hdfs', 'dfs', '-rm',  "\"{0}\"".format(remotefilepath)])
+    command = " ".join(['hdfs', 'dfs', '-rm', "\"{0}\"".format(remotefilepath)])
     print(command)
     print("Removing previous file " + remotefilepath + " ...")
-    p = subprocess.call(command,shell=True)
+    p = subprocess.call(command, shell=True)
     print("File removed!") if p == 0 else print("Fail to remove file from: " + remotefilepath)
     return p
 
 
 def move_file(_from_, _to_):
-    command = " ".join(['hdfs', 'dfs', '-mv',  "\"{0}\"".format(_from_),  "\"{0}\"".format(_to_)])
+    command = " ".join(['hdfs', 'dfs', '-mv', "\"{0}\"".format(_from_), "\"{0}\"".format(_to_)])
     print(command)
     print("Moving previous file from " + _from_ + " to: " + _to_ + " ...")
-    p = subprocess.call(command,shell=True)
+    p = subprocess.call(command, shell=True)
     print("File moved!") if p == 0 else print("Fail to move file from: " + _from_ + " to: " + _to_ + " ...")
     return p
 
@@ -98,16 +100,16 @@ def main():
     mode, input_file, output_path, faillines_path, faillinesdescription_path, origin, hivetable, donefile_path = parameters()
 
     # Initial filepath vars values.
-    localfile,qafaillines,qafaillineslog,donefile,hivefile = "","","","",""
+    localfile, qafaillines, qafaillineslog, donefile, hivefile = "", "", "", "", ""
 
     # Config file.
     config = GlobalConfiguration("gly")
-    file_path = config.get_value("path", default_section = True).replace("\\","/")
-    encoding = config.get_value("encoding", default_section = True)
+    file_path = config.get_value("path", default_section=True).replace("\\", "/")
+    encoding = config.get_value("encoding", default_section=True)
 
     # Paths.
-    input_file = input_file.replace("\\","/")
-    output_path = output_path.replace("\\","/")
+    input_file = input_file.replace("\\", "/")
+    output_path = output_path.replace("\\", "/")
     input_filename = basename(input_file)
     localfile = file_path + input_filename
     donefile = file_path + input_filename + "_status.csv"
@@ -134,7 +136,8 @@ def main():
         if mode == "D":
             # Download file for treatment.
             get_file(input_file, file_path)
-            flg_fail,flg_warning,flg_success,finalfile_path,status = gly.main(input_filename,qafaillines,qafaillineslog, status)
+            flg_fail, flg_warning, flg_success, finalfile_path, status = gly.main(input_filename, qafaillines,
+                                                                                  qafaillineslog, status)
             write_status_file(status, donefile)
             if flg_fail:
                 print("F")
@@ -153,7 +156,8 @@ def main():
         elif mode == "M":
             # Download file for treatment.
             get_file(input_file, file_path)
-            flg_fail,flg_warning,flg_success,finalfile_path,status = multiply.main(input_filename,qafaillines,qafaillineslog, status)
+            flg_fail, flg_warning, flg_success, finalfile_path, status = multiply.main(input_filename, qafaillines,
+                                                                                       qafaillineslog, status)
             write_status_file(status, donefile)
             if flg_fail:
                 print("F")
@@ -172,13 +176,16 @@ def main():
         elif mode == "S":
             # Download file for treatment.
             get_file(input_file, file_path)
-            flg_fail,flg_warning,flg_success,finalfile_path,status,hivefile = statistic.main(input_filename,qafaillines,qafaillineslog,status, origin)
+            flg_fail, flg_warning, flg_success, finalfile_path, status, hivefile = statistic.main(input_filename,
+                                                                                                  qafaillines,
+                                                                                                  qafaillineslog,
+                                                                                                  status, origin)
             write_status_file(status, donefile)
             if flg_fail:
                 print("F")
             elif flg_warning:
                 print("W")
-                #verify(put_file(finalfile_path, output_path))
+                # verify(put_file(finalfile_path, output_path))
                 verify(put_file(qafaillines, faillines_path))
                 verify(put_file(qafaillineslog, faillinesdescription_path))
                 verify(put_file(hive_file, hivetable))
@@ -197,5 +204,6 @@ def main():
         print("Exception ocurred: " + str(ex))
 
     finally:
-        remove_temp_files(local_file=localfile,qafaillines=qafaillines,qafaillineslog=qafaillineslog,done_file=donefile, hive_file=hivefile)
+        remove_temp_files(local_file=localfile, qafaillines=qafaillines, qafaillineslog=qafaillineslog,
+                          done_file=donefile, hive_file=hivefile)
         print("Done")
